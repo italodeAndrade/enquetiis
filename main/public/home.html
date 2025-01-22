@@ -7,39 +7,146 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="t1">enquetes</div>
+    <t1 class="t1"> enquetes</t1>
     <div id="container-enquetes"></div>
-    <script>
-        function carregar() {
-            fetch('/load_enquetes')
-                .then(response => response.json())
-                .then(data => {
-                    const body_enquetes = document.getElementById('container-enquetes');
-                    body_enquetes.innerHTML = ''; 
+        <button id="botão-add" onclick="opmodal()">add enquete</button>
+        <div id="modal">
+            <div id="content">
+                <span class="fechar" onclick="clsmodal()">&times;</span>
+                <h1>adicionar enquete</h1>
+
+                <form id="form_enquete">
+                    <label for="titulo">titulo</label>
+                    <input type="text" id="titulo" required>
+                    <label for="descr">descrição</label>
+                    <input type="text" id="descr" required>
+                    <label for="dt_init">data de começo</label>
+                    <input type="datetime" id="dt_init" required>
+                    <label for="dt_term">data de termino</label>
+                    <input type="datetime" id="dt_term" required>
+                    <button type="submit">criar enquete</button>
+                </form>
+                
+            </div>
+    </div>
     
-                    data.forEach(enquete => {
-                        const div_enquete = document.createElement('div');
-                        div_enquete.classList.add('enquete');
-                        const dataInicio = new Date(enquete.dt_init).toLocaleDateString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit' });
-                        const dataFim = new Date(enquete.dt_term).toLocaleDateString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit' });
-                        div_enquete.innerHTML = `
-                            <p><strong>ID:</strong> ${enquete.id}</p>
-                            <p><strong>tÍtulo:</strong> ${enquete.titulo}</p>
-                            <p><strong>descrição:</strong> ${enquete.descricao}</p>
-                            <p><strong>data inicio:</strong> ${dataInicio}</p>
-                            <p><strong>data final:</strong> ${dataFim}</p>
-                        `;
-    
-                        // Adiciona o bloco ao container de usuários
-                        body_enquetes.appendChild(div_enquete);
-                    });
-                })
-                .catch(error => {
-                    console.error('Erro ao carregar usuários:', error);
-                });
-        }
-    
-        window.onload = carregar;
-    </script>
+    <div container_edit>
+        <div id="modal_edit">
+            <div id="content_edit">
+                <span class="fechar" onclick="cls_edit()">&times;</span>
+                <h1>editar enquetes</h1>
+
+                <form id="form_edit">
+                    <input type="hidden" id="id" value="">
+                    <label for="titulo_edit">titulo</label>
+                    <input type="text" id="titulo_edit" required>
+                    <label for="descr_edit">descrição</label>
+                    <input type="text" id="descr_edit" required>
+                    <label for="dt_init_edit">data de começo</label>
+                    <input type="datetime" id="dt_init_edit" required>
+                    <label for="dt_term_edit">data de termino</label>
+                    <input type="datetime" id="dt_term_edit" required>
+                    <button type="submit">criar enquete</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
 </body>
+<script>
+
+    function opmodal() {
+        document.getElementById('modal').style.display = 'block';
+    }
+
+    
+    function clsmodal() {
+        document.getElementById('modal').style.display = 'none';
+    }
+
+    function op_edit(id,titulo,descricao,dt_init,dt_term){
+        document.getElementById('id').value= id
+        document.getElementById('titulo_edit').value= titulo
+        document.getElementById('descr_edit').value= descricao
+        document.getElementById('dt_init_edit').value= dt_init
+        document.getElementById('dt_term_edit').value= dt_term
+
+        document.getElementById('modal_edit').style.display = 'block';
+    }
+    function cls_edit() {
+        document.getElementById('modal_edit').style.display = 'none';
+    }
+    function carregar() {
+        fetch('/load_enquetes')
+            .then(response => response.json())
+            .then(data => {
+                const body_enquetes = document.getElementById('container-enquetes');
+                body_enquetes.innerHTML = ''; 
+
+                data.forEach(enquete => {
+                    const div_enquete = document.createElement('div');
+                    div_enquete.classList.add('enquete');
+                    const dataInicio = new Date(enquete.dt_init).toLocaleDateString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit' });
+                    const dataFim = new Date(enquete.dt_term).toLocaleDateString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit' });
+                    div_enquete.innerHTML = `
+                        <p><strong>ID:</strong> ${enquete.id}</p>
+                        <p><strong>tÍtulo:</strong> ${enquete.titulo}</p>
+                        <p><strong>descrição:</strong> ${enquete.descricao}</p>
+                        <p><strong>data inicio:</strong> ${dataInicio}</p>
+                        <p><strong>data final:</strong> ${dataFim}</p>
+                        <button id= "botão" onclick="excluir(${enquete.id})">excluir</button>
+                        <button id= "botão_edit" onclick="op_edit('${enquete.id}','${enquete.titulo}','${enquete.descricao}','${dataInicio}','${dataFim}')">editar</button>
+                    `;
+
+                    body_enquetes.appendChild(div_enquete);
+                });
+            })
+            .catch(error => {
+                console.error('Erro ao carregar enquetes:', error);
+            });
+    }
+    function excluir(id_enquete){
+        fetch(`/deletar/${id_enquete}`,{
+            method: `DELETE`
+        })
+        .then(response => response.json)
+        .then(data => {
+            console.log(data.message);
+            carregar();
+        })  
+    }
+    document.getElementById('form_enquete').addEventListener('submit', function(event){
+     event.preventDefault();
+     const titulo =document.getElementById('titulo').value;   
+     const descricao =document.getElementById('descr').value;   
+     const dt_init =document.getElementById('dt_init').value; 
+     const dt_term =document.getElementById('dt_term').value;  
+     
+     fetch('/inserir', {method: 'post',headers:{'content-type':'application/json'}, body:JSON.stringify({titulo,descricao,dt_init,dt_term})})
+     .then (response =>response.json())
+     .then(data=>{
+        console.log(data.message);
+        clsmodal();
+        carregar();
+
+     });
+    });
+    document.getElementById('form_edit').addEventListener('submit', function(event){
+        event.preventDefault();
+        const id_enquete=document.getElementById('id').value
+        const titulo =document.getElementById('titulo_edit').value;   
+        const descricao =document.getElementById('descr_edit').value;   
+        const dt_init =document.getElementById('dt_init_edit').value; 
+        const dt_term =document.getElementById('dt_term_edit').value;  
+
+        fetch(`/editar/${id_enquete}`,{method : 'post' , headers:{'content-type':'application/json'}, body:JSON.stringify({titulo,descricao,dt_init,dt_term})})
+        .then (response =>response.json())
+        .then(data=>{
+           console.log(data.message);
+           cls_edit();
+           carregar();
+        })
+       });
+    window.onload = carregar;
+</script>
 </html>
