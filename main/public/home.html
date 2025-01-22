@@ -1,11 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title class="titulo">enquetii</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    corpo
+    <div class="t1">enquetes</div>
+    <div id="container-enquetes"></div>
+    <script>
+        function carregar() {
+            fetch('/load_enquetes')
+                .then(response => response.json())
+                .then(data => {
+                    const body_enquetes = document.getElementById('container-enquetes');
+                    body_enquetes.innerHTML = ''; 
+    
+                    data.forEach(enquete => {
+                        const div_enquete = document.createElement('div');
+                        div_enquete.classList.add('enquete');
+                        const dataInicio = new Date(enquete.dt_init).toLocaleDateString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit' });
+                        const dataFim = new Date(enquete.dt_term).toLocaleDateString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit' });
+                        div_enquete.innerHTML = `
+                            <p><strong>ID:</strong> ${enquete.id}</p>
+                            <p><strong>tÍtulo:</strong> ${enquete.titulo}</p>
+                            <p><strong>descrição:</strong> ${enquete.descricao}</p>
+                            <p><strong>data inicio:</strong> ${dataInicio}</p>
+                            <p><strong>data final:</strong> ${dataFim}</p>
+                        `;
+    
+                        // Adiciona o bloco ao container de usuários
+                        body_enquetes.appendChild(div_enquete);
+                    });
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar usuários:', error);
+                });
+        }
+    
+        window.onload = carregar;
+    </script>
 </body>
 </html>

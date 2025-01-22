@@ -1,0 +1,19 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+.enquete {
+    background-color: #f0f0f0;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.enquete p {
+    margin: 5px 0;
+}
+
+.t1 {
+    font-size: 24px;
+    margin-bottom: 20px;}
