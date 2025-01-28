@@ -7,75 +7,86 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <t1 class="t1"> enquetes</t1>
-    <div id="container-enquetes"></div>
-        <button id="botão-add" onclick="opmodal()">add enquete</button>
-        <div id="modal">
-            <div id="content">
-                <span class="fechar" onclick="clsmodal()">&times;</span>
-                <h1>adicionar enquete</h1>
+    <header>
+        <h1 id="top">Enquetiis</h1>
+    </header>
 
-                <form id="form_enquete">
-                    <label for="titulo">titulo</label>
-                    <input type="text" id="titulo" required>
-                    <label for="descr">descrição</label>
-                    <input type="text" id="descr" required>
-                    <label for="dt_init">data de começo</label>
-                    <input type="datetime" id="dt_init" required>
-                    <label for="dt_term">data de termino</label>
-                    <input type="datetime" id="dt_term" required>
-                    <button type="submit">criar enquete</button>
-                </form>
-                
+    <div id="enquete_vs">
+        <div id="modal_enquete" style="display:none;">
+            <div id="enquete_content">
+                <span class="fechar" onclick="cls_view()">&times;</span>
+                <h1>Visualizar Enquete</h1>
+                <input type="hidden" id="id_enq">
+                <textarea id="titulo" disabled></textarea>
+                <textarea id="descricao" disabled></textarea>
+
+                <!-- Container para os tópicos -->
+                <div id="topicos_enquete" class="scrollable" ></div>
+
+                <button onclick="excluir(document.getElementById('id_enq').value)">Excluir</button>
+                <button onclick="abrirModalEdicao()">Editar</button>
             </div>
-    </div>
-    
-    <div container_edit>
-        <div id="modal_edit">
-            <div id="content_edit">
-                <span class="fechar" onclick="cls_edit()">&times;</span>
-                <h1>editar enquetes</h1>
-
-                <form id="form_edit">
-                    <input type="hidden" id="id" value="">
-                    <label for="titulo_edit">titulo</label>
-                    <input type="text" id="titulo_edit" required>
-                    <label for="descr_edit">descrição</label>
-                    <input type="text" id="descr_edit" required>
-                    <label for="dt_init_edit">data de começo</label>
-                    <input type="datetime" id="dt_init_edit" required>
-                    <label for="dt_term_edit">data de termino</label>
-                    <input type="datetime" id="dt_term_edit" required>
-                    <button type="submit">criar enquete</button>
-                </form>
-            </div>
-
         </div>
     </div>
+
+    <!-- Modal de edição da enquete -->
+    <div id="modal_editar" style="display:none;">
+        <div id="content_editar">
+            <span class="fechar" onclick="clsmodal_editar()">&times;</span>
+            <h1>Editar Enquete</h1>
+
+            <form id="form_editar">
+                <input type="hidden" id="id_editar">
+                <label for="titulo_editar">Título</label>
+                <input type="text" id="titulo_editar" required>
+                <label for="descricao_editar">Descrição</label>
+                <input type="text" id="descricao_editar" required>
+
+                <button type="submit" >Salvar Alterações</button>
+            </form>
+        </div>
+    </div>
+
+
+    <div id="container-enquetes"></div>
+
+
+    <button id="botao-add" onclick="opmodal_add()">+</button>
+
+
+    <div id="modal" style="display:none;">
+        <div id="content">
+            <span class="fechar" onclick="clsmodal_add()">&times;</span>
+            <h1>Adicionar Enquete</h1>
+
+            <form id="form_enquete">
+                <label for="titulo_add">Título</label>
+                <input type="text" id="titulo_add" required>
+                <label for="descr_add">Descrição</label>
+                <input type="text" id="descr_add" required>
+                <label for="dt_init">Data de Começo</label>
+                <input type="datetime-local" id="dt_init" required>
+                <label for="dt_term">Data de Término</label>
+                <input type="datetime-local" id="dt_term" required>
+
+
+                <div id="topicos-container" class="scrollable">
+                    <h2>Tópicos</h2>
+                </div>
+
+                <button type="button" onclick="adicionarTopico()">Adicionar Tópico</button>
+
+                <button type="submit">Criar Enquete</button>
+            </form>
+        </div>
+    </div>
+
 </body>
 <script>
+    let contadorTopicos = 0;
+    let socket;  
 
-    function opmodal() {
-        document.getElementById('modal').style.display = 'block';
-    }
 
-    
-    function clsmodal() {
-        document.getElementById('modal').style.display = 'none';
-    }
-
-    function op_edit(id,titulo,descricao,dt_init,dt_term){
-        document.getElementById('id').value= id
-        document.getElementById('titulo_edit').value= titulo
-        document.getElementById('descr_edit').value= descricao
-        document.getElementById('dt_init_edit').value= dt_init
-        document.getElementById('dt_term_edit').value= dt_term
-
-        document.getElementById('modal_edit').style.display = 'block';
-    }
-    function cls_edit() {
-        document.getElementById('modal_edit').style.display = 'none';
-    }
     function carregar() {
         fetch('/load_enquetes')
             .then(response => response.json())
@@ -86,18 +97,13 @@
                 data.forEach(enquete => {
                     const div_enquete = document.createElement('div');
                     div_enquete.classList.add('enquete');
-                    const dataInicio = new Date(enquete.dt_init).toLocaleDateString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit' });
-                    const dataFim = new Date(enquete.dt_term).toLocaleDateString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit' });
-                    div_enquete.innerHTML = `
-                        <p><strong>ID:</strong> ${enquete.id}</p>
-                        <p><strong>tÍtulo:</strong> ${enquete.titulo}</p>
-                        <p><strong>descrição:</strong> ${enquete.descricao}</p>
-                        <p><strong>data inicio:</strong> ${dataInicio}</p>
-                        <p><strong>data final:</strong> ${dataFim}</p>
-                        <button id= "botão" onclick="excluir(${enquete.id})">excluir</button>
-                        <button id= "botão_edit" onclick="op_edit('${enquete.id}','${enquete.titulo}','${enquete.descricao}','${dataInicio}','${dataFim}')">editar</button>
+                    div_enquete.innerHTML = ` 
+                        <p><strong>Título:</strong> ${enquete.titulo}</p>
+                        <p><strong>Descrição:</strong> ${enquete.descricao}</p>
+                        <p><strong>Data de Início:</strong> ${enquete.data_init}</p>
+                        <p><strong>Data de Término:</strong> ${enquete.data_term}</p>
+                        <button id="botao_visualizar" onclick="data_check('${enquete.id}', '${enquete.titulo}', '${enquete.descricao}', '${enquete.data_init}', '${enquete.data_term}')">Visualizar</button>
                     `;
-
                     body_enquetes.appendChild(div_enquete);
                 });
             })
@@ -105,48 +111,218 @@
                 console.error('Erro ao carregar enquetes:', error);
             });
     }
-    function excluir(id_enquete){
-        fetch(`/deletar/${id_enquete}`,{
-            method: `DELETE`
+
+    function excluir(id_enquete) {
+        cls_view()
+        fetch(`/deletar/${id_enquete}`, {
+            method: 'DELETE'
         })
-        .then(response => response.json)
+        .then(response => response.json())
         .then(data => {
             console.log(data.message);
-            carregar();
-        })  
+            carregar();  
+        });
     }
-    document.getElementById('form_enquete').addEventListener('submit', function(event){
-     event.preventDefault();
-     const titulo =document.getElementById('titulo').value;   
-     const descricao =document.getElementById('descr').value;   
-     const dt_init =document.getElementById('dt_init').value; 
-     const dt_term =document.getElementById('dt_term').value;  
-     
-     fetch('/inserir', {method: 'post',headers:{'content-type':'application/json'}, body:JSON.stringify({titulo,descricao,dt_init,dt_term})})
-     .then (response =>response.json())
-     .then(data=>{
-        console.log(data.message);
-        clsmodal();
-        carregar();
 
-     });
-    });
-    document.getElementById('form_edit').addEventListener('submit', function(event){
-        event.preventDefault();
-        const id_enquete=document.getElementById('id').value
-        const titulo =document.getElementById('titulo_edit').value;   
-        const descricao =document.getElementById('descr_edit').value;   
-        const dt_init =document.getElementById('dt_init_edit').value; 
-        const dt_term =document.getElementById('dt_term_edit').value;  
 
-        fetch(`/editar/${id_enquete}`,{method : 'post' , headers:{'content-type':'application/json'}, body:JSON.stringify({titulo,descricao,dt_init,dt_term})})
-        .then (response =>response.json())
-        .then(data=>{
-           console.log(data.message);
-           cls_edit();
-           carregar();
+    function op_view(id, titulo, descricao) {
+        document.getElementById('id_enq').value = id;
+        document.getElementById('titulo').value = titulo;
+        document.getElementById('descricao').value = descricao;
+
+        document.getElementById('modal_enquete').style.display = 'block'; 
+    }
+
+    function cls_view() {
+        document.getElementById('modal_enquete').style.display = 'none';
+    }
+
+
+    function opmodal_add() {
+        document.getElementById('modal').style.display = 'block';
+    }
+
+
+    function clsmodal_add() {
+        document.getElementById('modal').style.display = 'none';
+    }
+
+
+    function abrirModalEdicao() {
+        cls_view()
+        const id = document.getElementById('id_enq').value;
+        const titulo = document.getElementById('titulo').value;
+        const descricao = document.getElementById('descricao').value;
+
+        document.getElementById('id_editar').value = id;
+        document.getElementById('titulo_editar').value = titulo;
+        document.getElementById('descricao_editar').value = descricao;
+
+        document.getElementById('modal_editar').style.display = 'block'; 
+
+    }
+
+
+    function clsmodal_editar() {
+        document.getElementById('modal_editar').style.display = 'none';
+    }
+
+
+    document.getElementById('form_editar').addEventListener('submit', function(event) {
+        event.preventDefault();  
+
+        const id = document.getElementById('id_editar').value;
+        const titulo = document.getElementById('titulo_editar').value;
+        const descricao = document.getElementById('descricao_editar').value;
+
+
+        fetch(`/editar/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ titulo, descricao })
         })
-       });
-    window.onload = carregar;
+        .then(response => response.json())
+        .then(data => {
+            console.log(data.message);
+            clsmodal_editar();  
+            carregar();  
+        });
+    });
+
+
+    document.getElementById('form_enquete').addEventListener('submit', function(event) {
+        event.preventDefault();  
+
+        const titulo = document.getElementById('titulo_add').value;
+        const descricao = document.getElementById('descr_add').value;
+        const dt_init = document.getElementById('dt_init').value;
+        const dt_term = document.getElementById('dt_term').value;
+
+        const topicos = [];
+        document.querySelectorAll('.topico input').forEach(input => {
+            topicos.push(input.value);
+        });
+
+        const dados = { titulo, descricao, dt_init, dt_term, topicos };
+
+ 
+        fetch('/inserir', {
+            method: 'post',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dados)
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data.message);
+            clsmodal_add();  
+            carregar();  
+        });
+    });
+
+    
+    function data_check(id, titulo, descricao, init, term) {
+        const agora = new Date();
+        const inicio = converterData(init);
+        const fim = converterData(term);
+
+        console.log(` Início: ${inicio} | Fim: ${fim} | Agora: ${agora}`);
+
+        if (agora < inicio || agora > fim) {
+          document.getElementById('topicos_enquete').innerHTML = 'Esta enquete ainda não começou ou já foi encerrada.';  
+        } 
+        else {
+            carregar_topico(id);
+        }
+        op_view(id, titulo, descricao);  
+    }
+
+
+    function converterData(dataString) {
+        const [data, hora] = dataString.split(', '); 
+        const [dia, mes, ano] = data.split('/'); 
+
+        const dataISO = `${ano}-${mes}-${dia}T${hora}`;  
+        return new Date(dataISO);
+    }
+
+ 
+    function carregar_topico(id_enquete) {
+        const body_topico = document.getElementById('topicos_enquete');
+        fetch(`/load_topicos/${id_enquete}`)
+            .then(response => response.json())
+            .then(data => {
+                body_topico.innerHTML = '';  
+
+                data.forEach(topico => {
+                    const div_topico = document.createElement('div');
+                    div_topico.classList.add('topico');
+                    div_topico.id = `topico-${topico.id}`;
+                    div_topico.innerHTML = `
+                        <p>${topico.op}</p>
+                        <p id="votos-${topico.id}">${topico.votos}</p> 
+                        <button onclick='votar(${topico.id})'>Votar</button>
+                    `;
+                    body_topico.appendChild(div_topico);
+                });
+            })
+            .catch(error => {
+                console.error('Erro ao carregar tópicos:', error);
+            });
+    }
+
+   
+    function adicionarTopico() {
+        contadorTopicos++; 
+
+        const divTopico = document.createElement('div');  
+        divTopico.classList.add('topico');
+        divTopico.id = `topico-${contadorTopicos}`;
+
+        divTopico.innerHTML = `
+            <label for="topico-${contadorTopicos}">Tópico ${contadorTopicos}</label>
+            <input type="text" id="topico-${contadorTopicos}" name="topico-${contadorTopicos}" required>
+            <button type="button" onclick="removerTopico(${contadorTopicos})">Remover</button>
+        `;
+
+        document.getElementById('topicos-container').appendChild(divTopico);
+    }
+
+
+    function removerTopico(id) {
+        const divTopico = document.getElementById(`topico-${id}`);
+        divTopico.remove();
+    }
+
+    function votar(id) {
+        fetch(`/votar/${id}`);  
+    }
+
+
+    function conectarWebSocket() {
+        socket = new WebSocket(`ws://${window.location.host}`);
+        socket.onmessage = function(event) {
+            const message = JSON.parse(event.data);
+
+            if (message.type === 'voteUpdate') {
+                const { id, votos } = message.data;
+
+                const votosElement = document.getElementById(`votos-${id}`);
+                if (votosElement) {
+                    votosElement.textContent = votos;  
+                }
+            }
+        };
+
+        socket.onclose = function() {
+            console.log("WebSocket desconectado. Tentando reconectar");
+            setTimeout(conectarWebSocket, 5000);  
+        };
+    }
+
+
+    window.onload = function() {
+        carregar();
+        conectarWebSocket();  
+    };
 </script>
 </html>

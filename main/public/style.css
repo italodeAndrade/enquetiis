@@ -1,43 +1,121 @@
+
 body {
     font-family: Arial, sans-serif;
-    margin: 20px;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
+
+
+header {
+    background-color: #1ee556;
+    padding: 10px;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+    color: white;
+    font-size: 32px;
+    font-weight: bold;
+}
+
+
+#container-enquetes {
+    margin-top: 100px;  
+    padding: 20px;
+}
+
 
 .enquete {
     background-color: #f0f0f0;
     margin-bottom: 10px;
     padding: 10px;
     border-radius: 5px;
-}
-
-.enquete p {
-    margin: 5px 0;
-}
-
-.t1 {
-    font-size: 24px;
-    margin-bottom: 20px;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 
-#modal, #modal_edit {
-    display: none;  
+#form_enquete {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%; 
+    padding: 20px;
+}
+
+#content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; 
+    align-items: center;     
+    max-height: 90vh; 
+    overflow-y: auto;  
+}
+
+
+#form_enquete input[type="text"],
+#form_enquete input[type="datetime-local"],
+#form_enquete textarea {
+    width: 100%; 
+    max-width: 400px;
+    margin-bottom: 15px; 
+}
+
+
+#container-enquetes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+
+#botao-add {
+    font-size: 40px;
     position: fixed;
-    z-index: 1;  
+    border-radius: 100px;
+    bottom: 20px;
+    right: 20px;
+    background-color: #1ee556;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#botao-add:hover {
+    background-color: #17c544;
+}
+
+
+#modal, #modal_editar, #modal_enquete {
+    display: none;
+    position: fixed;
+    z-index: 10;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.4);  
+    background-color: rgba(0, 0, 0, 0.4); 
 }
 
-#content, #content_edit {
+
+
+#content, #content_editar, #enquete_content {
     background-color: white;
-    margin: 15% auto;  
+    margin: 5% auto;
     padding: 20px;
     border-radius: 5px;
-    width: 300px;
+    width: 90%;
+    max-width: 500px;
     text-align: center;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 .fechar {
@@ -45,6 +123,7 @@ body {
     float: right;
     font-size: 28px;
     font-weight: bold;
+    margin-top: -10px;
 }
 
 .fechar:hover, .fechar:focus {
@@ -53,23 +132,89 @@ body {
 }
 
 
-input[type="text"], input[type="datetime"], select {
+input[type="text"], input[type="datetime-local"], textarea {
     width: 100%;
     padding: 10px;
     margin: 10px 0;
     border-radius: 5px;
     border: 1px solid #ccc;
+    box-sizing: border-box;
 }
 
-button[type="submit"] {
+textarea {
+    resize: vertical;
+    height: 80px;
+}
+
+
+.scrollable {
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.scrollable::-webkit-scrollbar {
+    width: 6px;
+}
+
+.scrollable::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 5px;
+}
+
+
+button {
     padding: 10px 20px;
     background-color: #4CAF50;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
-button[type="submit"]:hover {
-    background-color: #45a049;
+
+
+#topicos-container h2 {
+    text-align: left;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+
+#topicos-container {
+    max-height: 200px; 
+    overflow-y: auto; 
+}
+
+#topicos_enquete .topico {
+    margin-bottom: 10px;
+    text-align: left;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#topicos_enquete .topico p {
+    margin: 5px 0;
+}
+
+
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 24px;
+    }
+
+    #botao-add {
+        font-size: 30px;
+        padding: 15px;
+        bottom: 15px;
+        right: 15px;
+    }
+
+    #content, #content_editar, #enquete_content {
+        width: 95%;
+    }
 }
